@@ -59,6 +59,12 @@ int main() {
 			continue; // need to print full board somehow
 		}
 		else {
+			bool checkAround = false;
+			if (playingBoard[row][column] != "*" && playingBoard[row][column] != "-") {
+				checkAround = true;
+				cout << playingBoard[row][column] << endl;
+				cout << "Checking around" << endl;
+			}
 			if (playingBoard[row][column] == "*") {
 				guessedBombs++;
 			}
@@ -72,7 +78,7 @@ int main() {
 				struct Node* next;
 			};
 			// search for all neighboring blocks if zero
-			if (newTile == 0) {
+			if (newTile == 0 || checkAround) {
 				//cout << "Tile was 0" << endl;
 				Node* head = NULL;
 				head = new Node();
@@ -83,7 +89,7 @@ int main() {
 				while (nodeSearching != NULL) {
 					int i = nodeSearching->r, j = nodeSearching->c;
 					if (i != 0) {
-						if (j != 0) {
+						if (j != 0 && playingBoard[i - 1][j - 1] != "*") {
 							//cout << "j does not equal 0";
 							// top left
 							aChar = '0' + markedBoard[i - 1][j - 1];
@@ -97,7 +103,7 @@ int main() {
 							}
 							playingBoard[i - 1][j - 1] = aChar;
 						}
-						if (j != 8) {
+						if (j != 8 && playingBoard[i - 1][j + 1] != "*") {
 							//cout << "j does not equal 8";
 							// top right
 							aChar = '0' + markedBoard[i - 1][j + 1];
@@ -112,19 +118,21 @@ int main() {
 							playingBoard[i - 1][j + 1] = aChar;
 						}
 						// top
-						aChar = '0' + markedBoard[i - 1][j];
-						if (markedBoard[i - 1][j] == 0 && playingBoard[i - 1][j] == "-") {
-							Node* newNode = NULL;
-							newNode = new Node();
-							newNode->r = i - 1;
-							newNode->c = j;
-							lastNode->next = newNode;
-							lastNode = newNode;
-						}
-						playingBoard[i - 1][j] = aChar;
+						if (playingBoard[i - 1][j] != "*") {
+							aChar = '0' + markedBoard[i - 1][j];
+							if (markedBoard[i - 1][j] == 0 && playingBoard[i - 1][j] == "-") {
+								Node* newNode = NULL;
+								newNode = new Node();
+								newNode->r = i - 1;
+								newNode->c = j;
+								lastNode->next = newNode;
+								lastNode = newNode;
+							}
+							playingBoard[i - 1][j] = aChar;
+						}	
 					}
 					// middle
-					if (j != 0) {
+					if (j != 0 && playingBoard[i][j - 1] != "*") {
 						//cout << "j does not equal 0";
 						// middle left
 						aChar = '0' + markedBoard[i][j - 1];
@@ -140,7 +148,7 @@ int main() {
 						}
 						playingBoard[i][j - 1] = aChar;
 					}
-					if (j != 8) {
+					if (j != 8 && playingBoard[i][j + 1] != "*") {
 						//cout << "j does not equal 8";
 						// middle right
 						aChar = '0' + markedBoard[i][j + 1];
@@ -159,7 +167,7 @@ int main() {
 					// bottom
 					if (i != 8) {
 						//cout << "i does not equal 8";
-						if (j != 0) {
+						if (j != 0 && playingBoard[i + 1][j - 1] != "*") {
 							//cout << "j does not equal 0";
 							// bottom left
 							aChar = '0' + markedBoard[i + 1][j - 1];
@@ -175,7 +183,7 @@ int main() {
 							}
 							playingBoard[i + 1][j - 1] = aChar;
 						}
-						if (j != 8) {
+						if (j != 8 && playingBoard[i + 1][j + 1] != "*") {
 							//cout << "j does not equal 8";
 							// bottom right
 							aChar = '0' + markedBoard[i + 1][j + 1];
@@ -192,18 +200,20 @@ int main() {
 							playingBoard[i + 1][j + 1] = aChar;
 						}
 						// bottom
-						aChar = '0' + markedBoard[i + 1][j];
-						if (markedBoard[i + 1][j] == 0 && playingBoard[i + 1][j] == "-") {
-							//uncover on playingBoard
-								//add new Node to linkedList
-							Node* newNode = NULL;
-							newNode = new Node();
-							newNode->r = i + 1;
-							newNode->c = j;
-							lastNode->next = newNode;
-							lastNode = newNode;
+						if (playingBoard[i + 1][j] != "*") {
+							aChar = '0' + markedBoard[i + 1][j];
+							if (markedBoard[i + 1][j] == 0 && playingBoard[i + 1][j] == "-") {
+								//uncover on playingBoard
+									//add new Node to linkedList
+								Node* newNode = NULL;
+								newNode = new Node();
+								newNode->r = i + 1;
+								newNode->c = j;
+								lastNode->next = newNode;
+								lastNode = newNode;
+							}
+							playingBoard[i + 1][j] = aChar;
 						}
-						playingBoard[i + 1][j] = aChar;
 					}
 					nodeSearching = nodeSearching->next;
 				}
