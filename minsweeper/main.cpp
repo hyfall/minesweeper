@@ -5,6 +5,7 @@
 
 using namespace std;
 
+void gameLoop();
 vector<vector<int>> makeGameboard();
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs);
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard);
@@ -19,7 +20,23 @@ class Node {
 };
 
 int main() {
+	bool play = true;
 	cout << "Welcome to Minesweeper" << endl;
+	while (play) {
+		gameLoop();
+		char playAgain;
+		cout << "Play Again? [y/n]" << endl;
+		cin >> playAgain;
+		if (playAgain != 'y') {
+			play = false;
+		}
+	}
+	
+	
+	return 0;
+}
+
+void gameLoop() {
 	vector<vector<int>> markedBoard = makeGameboard();
 	// first number is left and second number is top row
 	// cout << markedBoard[0][8] << endl; 
@@ -35,7 +52,7 @@ int main() {
 	printGameboard(playingBoard, guessedBombs);
 	int totalBombsLeft = 10;
 	bool notLost = true;
-	while (notLost && totalBombsLeft>0) {
+	while (notLost && totalBombsLeft > 0) {
 		int row, column;
 		char bomb;
 		cout << "Select your next move: selecting bomb (y/n)" << endl;
@@ -129,7 +146,7 @@ int main() {
 								lastNode = newNode;
 							}
 							playingBoard[i - 1][j] = aChar;
-						}	
+						}
 					}
 					// middle
 					if (j != 0 && playingBoard[i][j - 1] != "*") {
@@ -219,13 +236,12 @@ int main() {
 				}
 			}
 		}
-		
+
 		printGameboard(playingBoard, guessedBombs);
 	}
 	if (totalBombsLeft == 0) {
 		cout << "YOU WIN!" << endl;
 	}
-	return 0;
 }
 
 vector<vector<int>> makeGameboard() {
