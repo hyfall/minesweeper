@@ -5,11 +5,15 @@
 
 using namespace std;
 
+int rowSize = 9;
+int colSize = 9;
+int bombAmount = 10;
+
 void gameLoop();
 vector<vector<int>> makeGameboard();
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs);
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard);
-void printGameboard(char currentBoard[][9]);
+//void printGameboard(char currentBoard[][]);
 string uncoverTile(vector<vector<int>> completeBoard, int row, int column);
 
 class Node {
@@ -23,6 +27,24 @@ int main() {
 	bool play = true;
 	cout << "Welcome to Minesweeper" << endl;
 	while (play) {
+		int version;
+		cout << "What difficulty would you like to play?" << endl << "1) Easy (9x9)" << endl << "2) Medium (16x16)" << endl << "3) Hard (16x30)" << endl;
+		cin >> version;
+		if (version == 1) {
+			rowSize = 9;
+			colSize = 9;
+			bombAmount = 10;
+		}
+		else if (version == 2) {
+			rowSize = 16;
+			colSize = 16;
+			bombAmount = 40;
+		} 
+		else if (version == 3) {
+			rowSize = 16;
+			colSize = 30;
+			bombAmount = 99;
+		}
 		gameLoop();
 		char playAgain;
 		cout << "Play Again? [y/n]" << endl;
@@ -40,7 +62,7 @@ void gameLoop() {
 	vector<vector<int>> markedBoard = makeGameboard();
 	// first number is left and second number is top row
 	// cout << markedBoard[0][8] << endl; 
-	vector<vector<string>> playingBoard(9, vector<string>(9, "-"));
+	vector<vector<string>> playingBoard(rowSize, vector<string>(colSize, "-"));
 	/*char newBoard[9][9];
 	int i, j;
 	for (i = 0; i < 9; i++) {
@@ -48,9 +70,9 @@ void gameLoop() {
 			newBoard[i][j] = '-';
 		}
 	}*/
-	int guessedBombs = 10;
+	int guessedBombs = bombAmount;
 	printGameboard(playingBoard, guessedBombs);
-	int totalBombsLeft = 10;
+	int totalBombsLeft = bombAmount;
 	bool notLost = true;
 	while (notLost && totalBombsLeft > 0) {
 		int row, column;
@@ -120,7 +142,7 @@ void gameLoop() {
 							}
 							playingBoard[i - 1][j - 1] = aChar;
 						}
-						if (j != 8 && playingBoard[i - 1][j + 1] != "*") {
+						if (j != (colSize - 1) && playingBoard[i - 1][j + 1] != "*") {
 							//cout << "j does not equal 8";
 							// top right
 							aChar = '0' + markedBoard[i - 1][j + 1];
@@ -165,7 +187,7 @@ void gameLoop() {
 						}
 						playingBoard[i][j - 1] = aChar;
 					}
-					if (j != 8 && playingBoard[i][j + 1] != "*") {
+					if (j != (colSize - 1) && playingBoard[i][j + 1] != "*") {
 						//cout << "j does not equal 8";
 						// middle right
 						aChar = '0' + markedBoard[i][j + 1];
@@ -182,7 +204,7 @@ void gameLoop() {
 						playingBoard[i][j + 1] = aChar;
 					}
 					// bottom
-					if (i != 8) {
+					if (i != (rowSize - 1)) {
 						//cout << "i does not equal 8";
 						if (j != 0 && playingBoard[i + 1][j - 1] != "*") {
 							//cout << "j does not equal 0";
@@ -200,7 +222,7 @@ void gameLoop() {
 							}
 							playingBoard[i + 1][j - 1] = aChar;
 						}
-						if (j != 8 && playingBoard[i + 1][j + 1] != "*") {
+						if (j != (colSize - 1) && playingBoard[i + 1][j + 1] != "*") {
 							//cout << "j does not equal 8";
 							// bottom right
 							aChar = '0' + markedBoard[i + 1][j + 1];
@@ -246,7 +268,7 @@ void gameLoop() {
 
 vector<vector<int>> makeGameboard() {
 	//int board[9][9];
-	vector<vector<int>> board (9, vector<int>(9,0));
+	vector<vector<int>> board (rowSize, vector<int>(colSize,0));
 	int bombsRemaining = 10;
 
 	int randomNumber = rand();
@@ -258,11 +280,11 @@ vector<vector<int>> makeGameboard() {
 
 	int i, j;
 
-	for (i = 0; i < bombsRemaining;) {
-		int random = rand() % (9 * 9);
-		int x = random / 9;
-		int y = random % 9;
-		cout << random <<": " << x << y << endl;
+	for (i = 0; i < bombAmount;) {
+		int random = rand() % (rowSize * colSize);
+		int x = random / colSize;
+		int y = random % colSize;
+		cout << random <<": " << x << " " << y << endl;
 		if (board[x][y] == -1) {
 			continue;
 		}
@@ -272,8 +294,8 @@ vector<vector<int>> makeGameboard() {
 
 	cout << "making gameboard" << endl;
 
-	for (i = 0; i < 9; ++i) {
-		for (j = 0; j < 9; ++j) {
+	for (i = 0; i < rowSize; ++i) {
+		for (j = 0; j < colSize; ++j) {
 			//cout << "checking board[" << i << "][" << j << "]" << endl;
 			// does it have bomb?
 			// if no initialize at zero
@@ -294,7 +316,7 @@ vector<vector<int>> makeGameboard() {
 						bombsInVicinty++;
 					}
 				}
-				if (j != 8) {
+				if (j != (colSize - 1)) {
 					//cout << "j does not equal 8";
 					// top right
 					if (board[i - 1][j+1] == -1) {
@@ -314,7 +336,7 @@ vector<vector<int>> makeGameboard() {
 					bombsInVicinty++;
 				}
 			}
-			if (j != 8) {
+			if (j != (colSize - 1)) {
 				//cout << "j does not equal 8";
 				// middle right
 				if (board[i][j + 1] == -1) {
@@ -322,7 +344,7 @@ vector<vector<int>> makeGameboard() {
 				}
 			}
 			// bottom
-			if (i != 8) {
+			if (i != (rowSize - 1)) {
 				//cout << "i does not equal 8";
 				if (j != 0) {
 					//cout << "j does not equal 0";
@@ -331,7 +353,7 @@ vector<vector<int>> makeGameboard() {
 						bombsInVicinty++;
 					}
 				}
-				if (j != 8) {
+				if (j != (colSize - 1)) {
 					//cout << "j does not equal 8";
 					// bottom right
 					if (board[i + 1][j + 1] == -1) {
@@ -368,21 +390,31 @@ vector<vector<int>> makeGameboard() {
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs) {
 	int i, j;
 	cout << "BOMBS LEFT: " << guessedBombs << endl;
-	cout << "  ";
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
+	cout << "   ";
+	for (i = 0; i < colSize; i++) {
+		if (i < 10) {
+			cout << i << "  ";
+		}
+		else {
+			cout << i << " ";
+		}
 	}
 	cout << endl;
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
-		for (j = 0; j < 9; j++) {
-			cout << currentBoard[i][j] << " ";
+	for (i = 0; i < rowSize; i++) {
+		if (i < 10) {
+			cout << i << "  ";
+		}
+		else {
+			cout << i << " ";
+		}
+		for (j = 0; j < colSize; j++) {
+			cout << currentBoard[i][j] << "  ";
 		}
 		cout << endl;
 	}
 }
 
-void printGameboard(char currentBoard[][9]) {
+/*void printGameboard(char currentBoard[][colSize]) {
 	int i, j;
 	cout << "  ";
 	for (i = 0; i < 9; i++) {
@@ -396,23 +428,52 @@ void printGameboard(char currentBoard[][9]) {
 		}
 		cout << endl;
 	}
-}
+}*/
 
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard) {
-	int i, j;
+	/*int i, j;
 	cout << "  ";
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < colSize; i++) {
 		cout << i << " ";
 	}
 	cout << endl;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < rowSize; i++) {
 		cout << i << " ";
-		for (j = 0; j < 9; j++) {
+		for (j = 0; j < colSize; j++) {
 			if (markedBoard[i][j] == -1 && currentBoard[i][j] != "*") {
 				cout << "B ";
 			}
 			else {
 				cout << currentBoard[i][j] << " ";
+			}
+		}
+		cout << endl;
+	}*/
+
+	int i, j;
+	cout << "   ";
+	for (i = 0; i < colSize; i++) {
+		if (i < 10) {
+			cout << i << "  ";
+		}
+		else {
+			cout << i << " ";
+		}
+	}
+	cout << endl;
+	for (i = 0; i < rowSize; i++) {
+		if (i < 10) {
+			cout << i << "  ";
+		}
+		else {
+			cout << i << " ";
+		}
+		for (j = 0; j < colSize; j++) {
+			if (markedBoard[i][j] == -1 && currentBoard[i][j] != "*") {
+				cout << "B  ";
+			}
+			else {
+				cout << currentBoard[i][j] << "  ";
 			}
 		}
 		cout << endl;
