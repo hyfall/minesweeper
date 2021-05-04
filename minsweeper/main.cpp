@@ -30,6 +30,10 @@ int main() {
 		int version;
 		cout << "What difficulty would you like to play?" << endl << "1) Easy (9x9)" << endl << "2) Medium (16x16)" << endl << "3) Hard (16x30)" << endl;
 		cin >> version;
+		while (version != 1 && version != 2 && version != 3) {
+			cout << "That is not an option, please select 1, 2, or 3" << endl;
+			cin >> version;
+		}
 		if (version == 1) {
 			rowSize = 9;
 			colSize = 9;
@@ -79,10 +83,22 @@ void gameLoop() {
 		char bomb;
 		cout << "Select your next move: selecting bomb (y/n)" << endl;
 		cin >> bomb;
+		while (bomb != 'y' && bomb != 'n') {
+			cout << "That is not an option, please select y or n" << endl;
+			cin >> bomb;
+		}
 		cout << "Select your next move: pick the row" << endl;
 		cin >> row;
+		while (row > (rowSize - 1) || row < 0) {
+			cout << "Out of bounds, please reselect" << endl;
+			cin >> row;
+		}
 		cout << "Pick your column" << endl;
 		cin >> column;
+		while (column > (colSize - 1) || column < 0) {
+			cout << "Out of bounds, please reselect" << endl;
+			cin >> column;
+		}
 		int newTile = markedBoard[row][column];
 		if (bomb == 'y') {
 			playingBoard[row][column] = "*";
