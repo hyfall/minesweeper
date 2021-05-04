@@ -24,6 +24,7 @@
     <ProjectGuid>{b01321d6-9b7c-4ad3-9373-c3fb5eafbdb1}</ProjectGuid>
     <RootNamespace>minsweeper</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>minesweeper</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
