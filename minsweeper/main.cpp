@@ -13,8 +13,6 @@ void gameLoop();
 vector<vector<int>> makeGameboard();
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs);
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard);
-//void printGameboard(char currentBoard[][]);
-string uncoverTile(vector<vector<int>> completeBoard, int row, int column);
 
 class Node {
 	public:
@@ -64,16 +62,7 @@ int main() {
 
 void gameLoop() {
 	vector<vector<int>> markedBoard = makeGameboard();
-	// first number is left and second number is top row
-	// cout << markedBoard[0][8] << endl; 
 	vector<vector<string>> playingBoard(rowSize, vector<string>(colSize, "-"));
-	/*char newBoard[9][9];
-	int i, j;
-	for (i = 0; i < 9; i++) {
-		for (j = 0; j < 9; j++) {
-			newBoard[i][j] = '-';
-		}
-	}*/
 	int guessedBombs = bombAmount;
 	printGameboard(playingBoard, guessedBombs);
 	int totalBombsLeft = bombAmount;
@@ -108,24 +97,17 @@ void gameLoop() {
 			}
 		}
 		else if (newTile == -1) {
-			cout << "YOU LOST!" << endl;
 			notLost = false;
-			printLosingGameboard(markedBoard, playingBoard);
-			continue; // need to print full board somehow
 		}
 		else {
 			bool checkAround = false;
 			if (playingBoard[row][column] != "*" && playingBoard[row][column] != "-") {
-				checkAround = true;
-				cout << playingBoard[row][column] << endl;
-				cout << "Checking around" << endl;
+				checkAround = true;;
 			}
 			if (playingBoard[row][column] == "*") {
 				guessedBombs++;
 			}
-			//cout << newTile << endl;
 			char aChar = '0' + newTile;
-			//cout << aChar << endl;
 			playingBoard[row][column] = aChar;
 			struct Node {
 				int r;
@@ -134,7 +116,6 @@ void gameLoop() {
 			};
 			// search for all neighboring blocks if zero
 			if (newTile == 0 || checkAround) {
-				//cout << "Tile was 0" << endl;
 				Node* head = NULL;
 				head = new Node();
 				head->r = row;
@@ -145,7 +126,6 @@ void gameLoop() {
 					int i = nodeSearching->r, j = nodeSearching->c;
 					if (i != 0) {
 						if (j != 0 && playingBoard[i - 1][j - 1] != "*") {
-							//cout << "j does not equal 0";
 							// top left
 							aChar = '0' + markedBoard[i - 1][j - 1];
 							if (markedBoard[i - 1][j - 1] == 0 && playingBoard[i - 1][j - 1] == "-") {
@@ -163,7 +143,6 @@ void gameLoop() {
 							playingBoard[i - 1][j - 1] = aChar;
 						}
 						if (j != (colSize - 1) && playingBoard[i - 1][j + 1] != "*") {
-							//cout << "j does not equal 8";
 							// top right
 							aChar = '0' + markedBoard[i - 1][j + 1];
 							if (markedBoard[i - 1][j + 1] == 0 && playingBoard[i - 1][j + 1] == "-") {
@@ -200,12 +179,9 @@ void gameLoop() {
 					}
 					// middle
 					if (j != 0 && playingBoard[i][j - 1] != "*") {
-						//cout << "j does not equal 0";
 						// middle left
 						aChar = '0' + markedBoard[i][j - 1];
 						if (markedBoard[i][j - 1] == 0 && playingBoard[i][j - 1] == "-") {
-							//uncover on playingBoard
-								//add new Node to linkedList
 							Node* newNode = NULL;
 							newNode = new Node();
 							newNode->r = i;
@@ -220,12 +196,9 @@ void gameLoop() {
 						playingBoard[i][j - 1] = aChar;
 					}
 					if (j != (colSize - 1) && playingBoard[i][j + 1] != "*") {
-						//cout << "j does not equal 8";
 						// middle right
 						aChar = '0' + markedBoard[i][j + 1];
 						if (markedBoard[i][j + 1] == 0 && playingBoard[i][j + 1] == "-") {
-							//uncover on playingBoard
-								//add new Node to linkedList
 							Node* newNode = NULL;
 							newNode = new Node();
 							newNode->r = i;
@@ -241,14 +214,10 @@ void gameLoop() {
 					}
 					// bottom
 					if (i != (rowSize - 1)) {
-						//cout << "i does not equal 8";
 						if (j != 0 && playingBoard[i + 1][j - 1] != "*") {
-							//cout << "j does not equal 0";
 							// bottom left
 							aChar = '0' + markedBoard[i + 1][j - 1];
 							if (markedBoard[i + 1][j - 1] == 0 && playingBoard[i + 1][j - 1] == "-") {
-								//uncover on playingBoard
-									//add new Node to linkedList
 								Node* newNode = NULL;
 								newNode = new Node();
 								newNode->r = i + 1;
@@ -263,12 +232,9 @@ void gameLoop() {
 							playingBoard[i + 1][j - 1] = aChar;
 						}
 						if (j != (colSize - 1) && playingBoard[i + 1][j + 1] != "*") {
-							//cout << "j does not equal 8";
 							// bottom right
 							aChar = '0' + markedBoard[i + 1][j + 1];
 							if (markedBoard[i + 1][j + 1] == 0 && playingBoard[i + 1][j + 1] == "-") {
-								//uncover on playingBoard
-									//add new Node to linkedList
 								Node* newNode = NULL;
 								newNode = new Node();
 								newNode->r = i + 1;
@@ -286,8 +252,6 @@ void gameLoop() {
 						if (playingBoard[i + 1][j] != "*") {
 							aChar = '0' + markedBoard[i + 1][j];
 							if (markedBoard[i + 1][j] == 0 && playingBoard[i + 1][j] == "-") {
-								//uncover on playingBoard
-									//add new Node to linkedList
 								Node* newNode = NULL;
 								newNode = new Node();
 								newNode->r = i + 1;
@@ -320,16 +284,10 @@ void gameLoop() {
 }
 
 vector<vector<int>> makeGameboard() {
-	//int board[9][9];
 	vector<vector<int>> board (rowSize, vector<int>(colSize,0));
 	int bombsRemaining = 10;
 
-	int randomNumber = rand();
-	cout << randomNumber << endl;
-
 	srand(time(NULL));
-	int secret = rand() % 10 + 1;
-	cout << secret << endl;
 
 	int i, j;
 
@@ -337,7 +295,6 @@ vector<vector<int>> makeGameboard() {
 		int random = rand() % (rowSize * colSize);
 		int x = random / colSize;
 		int y = random % colSize;
-		cout << random <<": " << x << " " << y << endl;
 		if (board[x][y] == -1) {
 			continue;
 		}
@@ -345,32 +302,22 @@ vector<vector<int>> makeGameboard() {
 		i++;
 	}
 
-	cout << "making gameboard" << endl;
+	//cout << "making gameboard" << endl;
 
 	for (i = 0; i < rowSize; ++i) {
 		for (j = 0; j < colSize; ++j) {
-			//cout << "checking board[" << i << "][" << j << "]" << endl;
-			// does it have bomb?
-			// if no initialize at zero
-			// count in tl t tr l r bl b br
 			if (board[i][j] == -1) {
 				continue;
 			}
-			//board[i][j] = 0;
-			// classic
 			int bombsInVicinty = 0;
-			// top row
 			if (i != 0) {
-				//cout << "i does not equal 0";
 				if (j != 0) {
-					//cout << "j does not equal 0";
 					// top left
 					if (board[i - 1][j - 1] == -1) {
 						bombsInVicinty++;
 					}
 				}
 				if (j != (colSize - 1)) {
-					//cout << "j does not equal 8";
 					// top right
 					if (board[i - 1][j+1] == -1) {
 						bombsInVicinty++;
@@ -383,14 +330,12 @@ vector<vector<int>> makeGameboard() {
 			}
 			// middle
 			if (j != 0) {
-				//cout << "j does not equal 0";
 				// middle left
 				if (board[i][j - 1] == -1) {
 					bombsInVicinty++;
 				}
 			}
 			if (j != (colSize - 1)) {
-				//cout << "j does not equal 8";
 				// middle right
 				if (board[i][j + 1] == -1) {
 					bombsInVicinty++;
@@ -398,16 +343,13 @@ vector<vector<int>> makeGameboard() {
 			}
 			// bottom
 			if (i != (rowSize - 1)) {
-				//cout << "i does not equal 8";
 				if (j != 0) {
-					//cout << "j does not equal 0";
 					// bottom left
 					if (board[i + 1][j - 1] == -1) {
 						bombsInVicinty++;
 					}
 				}
 				if (j != (colSize - 1)) {
-					//cout << "j does not equal 8";
 					// bottom right
 					if (board[i + 1][j + 1] == -1) {
 						bombsInVicinty++;
@@ -418,24 +360,9 @@ vector<vector<int>> makeGameboard() {
 					bombsInVicinty++;
 				}
 			}
-			//cout << "bombs around: " << bombsInVicinty;
 			board[i][j] = bombsInVicinty;
 		}
 	}
-	/*cout << "Printing board" << endl;
-	
-	cout << "  ";
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
-	}
-	cout << endl;
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
-		for (j = 0; j < 9; j++) {
-			cout << board[i][j] << " ";
-		}
-		cout << endl;
-	}*/
 
 	return board;
 }
@@ -467,41 +394,7 @@ void printGameboard(vector<vector<string>> currentBoard, int guessedBombs) {
 	}
 }
 
-/*void printGameboard(char currentBoard[][colSize]) {
-	int i, j;
-	cout << "  ";
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
-	}
-	cout << endl;
-	for (i = 0; i < 9; i++) {
-		cout << i << " ";
-		for (j = 0; j < 9; j++) {
-			cout << currentBoard[i][j] << " ";
-		}
-		cout << endl;
-	}
-}*/
-
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard) {
-	/*int i, j;
-	cout << "  ";
-	for (i = 0; i < colSize; i++) {
-		cout << i << " ";
-	}
-	cout << endl;
-	for (i = 0; i < rowSize; i++) {
-		cout << i << " ";
-		for (j = 0; j < colSize; j++) {
-			if (markedBoard[i][j] == -1 && currentBoard[i][j] != "*") {
-				cout << "B ";
-			}
-			else {
-				cout << currentBoard[i][j] << " ";
-			}
-		}
-		cout << endl;
-	}*/
 
 	int i, j;
 	cout << "   ";
