@@ -156,6 +156,10 @@ void gameLoop() {
 								lastNode->next = newNode;
 								lastNode = newNode;
 							}
+							else if (markedBoard[i - 1][j - 1] == -1) {
+								notLost = false;
+								break;
+							}
 							playingBoard[i - 1][j - 1] = aChar;
 						}
 						if (j != (colSize - 1) && playingBoard[i - 1][j + 1] != "*") {
@@ -170,6 +174,10 @@ void gameLoop() {
 								lastNode->next = newNode;
 								lastNode = newNode;
 							}
+							else if (markedBoard[i - 1][j + 1] == -1) {
+								notLost = false;
+								break;
+							}
 							playingBoard[i - 1][j + 1] = aChar;
 						}
 						// top
@@ -182,6 +190,10 @@ void gameLoop() {
 								newNode->c = j;
 								lastNode->next = newNode;
 								lastNode = newNode;
+							}
+							else if (markedBoard[i - 1][j] == -1) {
+								notLost = false;
+								break;
 							}
 							playingBoard[i - 1][j] = aChar;
 						}
@@ -201,6 +213,10 @@ void gameLoop() {
 							lastNode->next = newNode;
 							lastNode = newNode;
 						}
+						else if (markedBoard[i][j - 1] == -1) {
+							notLost = false;
+							break;
+						}
 						playingBoard[i][j - 1] = aChar;
 					}
 					if (j != (colSize - 1) && playingBoard[i][j + 1] != "*") {
@@ -216,6 +232,10 @@ void gameLoop() {
 							newNode->c = j + 1;
 							lastNode->next = newNode;
 							lastNode = newNode;
+						}
+						else if (markedBoard[i][j + 1] == -1) {
+							notLost = false;
+							break;
 						}
 						playingBoard[i][j + 1] = aChar;
 					}
@@ -236,6 +256,10 @@ void gameLoop() {
 								lastNode->next = newNode;
 								lastNode = newNode;
 							}
+							else if (markedBoard[i + 1][j - 1] == -1) {
+								notLost = false;
+								break;
+							}
 							playingBoard[i + 1][j - 1] = aChar;
 						}
 						if (j != (colSize - 1) && playingBoard[i + 1][j + 1] != "*") {
@@ -252,6 +276,10 @@ void gameLoop() {
 								lastNode->next = newNode;
 								lastNode = newNode;
 							}
+							else if (markedBoard[i + 1][j + 1] == -1) {
+								notLost = false;
+								break;
+							}
 							playingBoard[i + 1][j + 1] = aChar;
 						}
 						// bottom
@@ -267,6 +295,10 @@ void gameLoop() {
 								lastNode->next = newNode;
 								lastNode = newNode;
 							}
+							else if (markedBoard[i + 1][j] == -1) {
+								notLost = false;
+								break;
+							}
 							playingBoard[i + 1][j] = aChar;
 						}
 					}
@@ -274,8 +306,13 @@ void gameLoop() {
 				}
 			}
 		}
-
-		printGameboard(playingBoard, guessedBombs);
+		if (notLost) {
+			printGameboard(playingBoard, guessedBombs);
+		}
+		else {
+			cout << "YOU LOST!" << endl;
+			printLosingGameboard(markedBoard, playingBoard);
+		}
 	}
 	if (totalBombsLeft == 0) {
 		cout << "YOU WIN!" << endl;
