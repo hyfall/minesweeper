@@ -10,7 +10,7 @@ int colSize = 9;
 int bombAmount = 10;
 
 void gameLoop();
-vector<vector<int>> makeGameboard();
+vector<vector<int>> makeGameboard(int firstRow, int firstColumn);
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs);
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard);
 
@@ -61,21 +61,29 @@ int main() {
 }
 
 void gameLoop() {
-	vector<vector<int>> markedBoard = makeGameboard();
+	
 	vector<vector<string>> playingBoard(rowSize, vector<string>(colSize, "-"));
 	int guessedBombs = bombAmount;
 	printGameboard(playingBoard, guessedBombs);
+	vector<vector<int>> markedBoard;
+
 	int totalBombsLeft = bombAmount;
-	bool notLost = true;
+	bool notLost = true, firstTurn = true;
 	while (notLost && totalBombsLeft > 0) {
 		int row, column;
 		char bomb;
-		cout << "Select your next move: selecting bomb (y/n)" << endl;
-		cin >> bomb;
-		while (bomb != 'y' && bomb != 'n') {
-			cout << "That is not an option, please select y or n" << endl;
+		if (!firstTurn) {
+			cout << "Select your next move: selecting bomb (y/n)" << endl;
 			cin >> bomb;
+			while (bomb != 'y' && bomb != 'n') {
+				cout << "That is not an option, please select y or n" << endl;
+				cin >> bomb;
+			}
 		}
+		else {
+			bomb = 'n';
+		}
+		
 		cout << "Select your next move: pick the row" << endl;
 		cin >> row;
 		while (row > (rowSize - 1) || row < 0) {
@@ -87,6 +95,10 @@ void gameLoop() {
 		while (column > (colSize - 1) || column < 0) {
 			cout << "Out of bounds, please reselect" << endl;
 			cin >> column;
+		}
+		if (firstTurn) {
+			markedBoard = makeGameboard(row, column);
+			firstTurn = false;
 		}
 		int newTile = markedBoard[row][column];
 		if (bomb == 'y') {
@@ -283,8 +295,8 @@ void gameLoop() {
 	}
 }
 
-vector<vector<int>> makeGameboard() {
-	vector<vector<int>> board (rowSize, vector<int>(colSize,0));
+vector<vector<int>> makeGameboard(int firstRow, int firstColumn) {
+	vector<vector<int>> board(rowSize, vector<int>(colSize, 0));
 	int bombsRemaining = 10;
 
 	srand(time(NULL));
@@ -298,6 +310,20 @@ vector<vector<int>> makeGameboard() {
 		if (board[x][y] == -1) {
 			continue;
 		}
+		// logging for if errors
+		/*cout << "x: " << x << " fR " << (firstRow) << endl;
+		cout << "y: " << y << " fC " << (firstColumn) << endl;
+		if (firstRow - 1 <= x && x <= firstRow + 1) {
+			cout << " in x range " << endl;
+		}
+		if (firstColumn - 1 <= y && y <= firstColumn + 1) {
+			cout << " in y range " << endl;
+		}*/
+		// check if around first row and column
+		if (firstRow - 1 <= x && x <= firstRow + 1 && firstColumn - 1 <= y && y <= firstColumn + 1) {
+			continue;
+		}
+
 		board[x][y] = -1;
 		i++;
 	}
@@ -319,7 +345,7 @@ vector<vector<int>> makeGameboard() {
 				}
 				if (j != (colSize - 1)) {
 					// top right
-					if (board[i - 1][j+1] == -1) {
+					if (board[i - 1][j + 1] == -1) {
 						bombsInVicinty++;
 					}
 				}
