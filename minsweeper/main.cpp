@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -9,8 +10,9 @@ int rowSize = 9;
 int colSize = 9;
 int bombAmount = 10;
 
-void gameLoop();
-vector<vector<int>> makeGameboard(int firstRow, int firstColumn);
+string gameLoop(string mapSeed);
+vector<vector<int>> makeGameboard(int firstRow, int firstColumn, time_t timeValue);
+vector<vector<int>> makeGameboard(string mapSeed);
 void printGameboard(vector<vector<string>> currentBoard, int guessedBombs);
 void printLosingGameboard(vector<vector<int>> markedBoard, vector<vector<string>> currentBoard);
 
@@ -26,10 +28,11 @@ int main() {
 	cout << "Welcome to Minesweeper" << endl;
 	while (play) {
 		int version;
-		cout << "What difficulty would you like to play?" << endl << "1) Easy (9x9)" << endl << "2) Medium (16x16)" << endl << "3) Hard (16x30)" << endl;
+		string mapSeed = "";
+		cout << "What difficulty would you like to play?" << endl << "1) Easy (9x9)" << endl << "2) Medium (16x16)" << endl << "3) Hard (16x30)" << endl << "4) Enter Map Seed" << endl;
 		cin >> version;
-		while (version != 1 && version != 2 && version != 3) {
-			cout << "That is not an option, please select 1, 2, or 3" << endl;
+		while (version != 1 && version != 2 && version != 3 && version != 4) {
+			cout << "That is not an option, please select 1, 2, 3, or 4" << endl;
 			cin >> version;
 		}
 		if (version == 1) {
@@ -47,10 +50,22 @@ int main() {
 			colSize = 30;
 			bombAmount = 99;
 		}
-		gameLoop();
+		else if (version == 4) {
+			cout << "Enter map seed:" << endl;
+			cin >> mapSeed;
+			rowSize= stoi(mapSeed.substr(mapSeed.length() - 6, 2));
+			colSize = stoi(mapSeed.substr(mapSeed.length() - 4, 2));
+			bombAmount = stoi(mapSeed.substr(mapSeed.length() - 2));
+		} 
+		mapSeed = gameLoop(mapSeed);
 		char playAgain;
-		cout << "Play Again? [y/n]" << endl;
+		cout << "Play Again? [y/n] or [s]hare map seed" << endl;
 		cin >> playAgain;
+		if (playAgain == 's') {
+			cout << "Map Seed: " << mapSeed << endl;
+			cout << "Play Again? [y/n]" << endl;
+			cin >> playAgain;
+		}
 		if (playAgain != 'y') {
 			play = false;
 		}
@@ -60,7 +75,7 @@ int main() {
 	return 0;
 }
 
-void gameLoop() {
+string gameLoop(string mapSeed) {
 	
 	vector<vector<string>> playingBoard(rowSize, vector<string>(colSize, "-"));
 	int guessedBombs = bombAmount;
@@ -69,6 +84,7 @@ void gameLoop() {
 
 	int totalBombsLeft = bombAmount;
 	bool notLost = true, firstTurn = true;
+	string newMapSeed = "";
 	while (notLost && totalBombsLeft > 0) {
 		int row, column;
 		char bomb;
@@ -96,8 +112,33 @@ void gameLoop() {
 			cout << "Out of bounds, please reselect" << endl;
 			cin >> column;
 		}
-		if (firstTurn) {
-			markedBoard = makeGameboard(row, column);
+		if (firstTurn && mapSeed.empty()) {
+			time_t timeValue = time(NULL);
+			markedBoard = makeGameboard(row, column, timeValue);
+			//make mapseed
+			string rowString = to_string(row), columnString = to_string(column);
+			if (rowString.length() == 1) {
+				rowString = "0" + to_string(row);
+			}
+			if (columnString.length() == 1) {
+				columnString = "0" + to_string(column);
+			}
+			string rowSizeString = to_string(rowSize), columnSizeString = to_string(colSize);
+			if (rowSizeString.length() == 1) {
+				rowSizeString = "0" + to_string(rowSize);
+			}
+			if (columnSizeString.length() == 1) {
+				columnSizeString = "0" + to_string(colSize);
+			}
+			newMapSeed = to_string(timeValue) + rowString + columnString + rowSizeString + columnSizeString + to_string(bombAmount);
+
+			firstTurn = false;
+		}
+		else if (firstTurn && !mapSeed.empty()) {
+			newMapSeed = mapSeed + "";
+			mapSeed.erase(mapSeed.length() - 6);
+			markedBoard = makeGameboard(mapSeed);
+
 			firstTurn = false;
 		}
 		int newTile = markedBoard[row][column];
@@ -288,18 +329,19 @@ void gameLoop() {
 		else {
 			cout << "YOU LOST!" << endl;
 			printLosingGameboard(markedBoard, playingBoard);
+			return newMapSeed;
 		}
 	}
 	if (totalBombsLeft == 0) {
 		cout << "YOU WIN!" << endl;
+		return newMapSeed;
 	}
 }
 
-vector<vector<int>> makeGameboard(int firstRow, int firstColumn) {
+vector<vector<int>> makeGameboard(int firstRow, int firstColumn, time_t timeValue) {
 	vector<vector<int>> board(rowSize, vector<int>(colSize, 0));
-	int bombsRemaining = 10;
 
-	srand(time(NULL));
+	srand(timeValue);
 
 	int i, j;
 
@@ -320,6 +362,119 @@ vector<vector<int>> makeGameboard(int firstRow, int firstColumn) {
 			cout << " in y range " << endl;
 		}*/
 		// check if around first row and column
+		if (firstRow - 1 <= x && x <= firstRow + 1 && firstColumn - 1 <= y && y <= firstColumn + 1) {
+			continue;
+		}
+
+		board[x][y] = -1;
+		i++;
+	}
+
+	//cout << "making gameboard" << endl;
+
+	for (i = 0; i < rowSize; ++i) {
+		for (j = 0; j < colSize; ++j) {
+			if (board[i][j] == -1) {
+				continue;
+			}
+			int bombsInVicinty = 0;
+			if (i != 0) {
+				if (j != 0) {
+					// top left
+					if (board[i - 1][j - 1] == -1) {
+						bombsInVicinty++;
+					}
+				}
+				if (j != (colSize - 1)) {
+					// top right
+					if (board[i - 1][j + 1] == -1) {
+						bombsInVicinty++;
+					}
+				}
+				// top
+				if (board[i - 1][j] == -1) {
+					bombsInVicinty++;
+				}
+			}
+			// middle
+			if (j != 0) {
+				// middle left
+				if (board[i][j - 1] == -1) {
+					bombsInVicinty++;
+				}
+			}
+			if (j != (colSize - 1)) {
+				// middle right
+				if (board[i][j + 1] == -1) {
+					bombsInVicinty++;
+				}
+			}
+			// bottom
+			if (i != (rowSize - 1)) {
+				if (j != 0) {
+					// bottom left
+					if (board[i + 1][j - 1] == -1) {
+						bombsInVicinty++;
+					}
+				}
+				if (j != (colSize - 1)) {
+					// bottom right
+					if (board[i + 1][j + 1] == -1) {
+						bombsInVicinty++;
+					}
+				}
+				// bottom
+				if (board[i + 1][j] == -1) {
+					bombsInVicinty++;
+				}
+			}
+			board[i][j] = bombsInVicinty;
+		}
+	}
+
+	return board;
+}
+
+vector<vector<int>> makeGameboard(string mapSeed) {
+	vector<vector<int>> board(rowSize, vector<int>(colSize, 0));
+
+	// map seed probably stores srand info and the first row/column
+	
+
+	int firstRow = stoi(mapSeed.substr(mapSeed.length() - 4, 2));
+	int firstColumn = stoi(mapSeed.substr(mapSeed.length() - 2));
+	cout << firstRow << " " << firstColumn << endl;
+	
+	mapSeed.erase(mapSeed.length() - 4);
+	int timeValue = stoi(mapSeed);
+
+
+	//cout << "time value? " << timeValue << endl;	
+
+	srand(timeValue);
+
+	int i, j;
+
+	for (i = 0; i < bombAmount;) {
+		int random = rand() % (rowSize * colSize);
+		int x = random / colSize;
+		int y = random % colSize;
+		cout << i << ": " << x << " " << y << endl;
+		if (board[x][y] == -1) {
+			continue;
+		}
+		// logging for if errors
+		/*cout << "x: " << x << " fR " << (firstRow) << endl;
+		cout << "y: " << y << " fC " << (firstColumn) << endl;
+		if (firstRow - 1 <= x && x <= firstRow + 1) {
+			cout << " in x range " << endl;
+		}
+		if (firstColumn - 1 <= y && y <= firstColumn + 1) {
+			cout << " in y range " << endl;
+		}*/
+		// check if around first row and column
+		//int firstRow = 0;
+		//int firstColumn = 0;
 		if (firstRow - 1 <= x && x <= firstRow + 1 && firstColumn - 1 <= y && y <= firstColumn + 1) {
 			continue;
 		}
